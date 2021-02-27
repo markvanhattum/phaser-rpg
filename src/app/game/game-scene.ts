@@ -1,8 +1,12 @@
+import { GridControls } from "../grid/grid-controls";
+import { GridPhysics } from "../grid/grid-physics";
 import { Player } from "../player/player";
 
 export class GameScene extends Phaser.Scene {  
     private player: Player;
-
+    private gridControls: GridControls;
+    private gridPhysics: GridPhysics;
+    
     constructor() {
       super({ key: 'main' });
     }
@@ -22,8 +26,13 @@ export class GameScene extends Phaser.Scene {
       playerSprite.setDepth(2);
       this.cameras.main.startFollow(playerSprite);
       this.player = new Player(playerSprite);
-      this.player.setPosition(8,9);
+      this.player.setCoordinates(8,9);
   
+      this.gridPhysics = new GridPhysics(this.player);
+      this.gridControls = new GridControls(
+        this.input,
+        this.gridPhysics
+      );
     }  
   
     public preload() {
@@ -37,8 +46,9 @@ export class GameScene extends Phaser.Scene {
       });
     }
   
-    public update() {
-      console.log('update method');
+    public update(_time: number, delta: number) {
+        this.gridControls.update();
+        this.gridPhysics.update(delta);
     }
   }
   

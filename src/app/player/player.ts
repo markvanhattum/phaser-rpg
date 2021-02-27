@@ -13,10 +13,18 @@ export class Player {
     this.sprite.setFrame(55);
   }
 
-  public setPosition(positionX: number, positionY: number) {
+  public getPosition(): Phaser.Math.Vector2 {
+    return this.sprite.getCenter();
+  }
+
+  public setPosition(position: Phaser.Math.Vector2): void {
+    this.sprite.setPosition(position.x, position.y);
+  }
+  
+  public setCoordinates(x: number, y: number) {
     this.sprite.setPosition(
-      positionX * GameConfiguration.TILE_SIZE + this.playerOffsetX(),
-      positionY * GameConfiguration.TILE_SIZE + this.playerOffsetY()
+      x * GameConfiguration.TILE_SIZE + this.playerOffsetX(),
+      y * GameConfiguration.TILE_SIZE + this.playerOffsetY()
     );
   }
   
