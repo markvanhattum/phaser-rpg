@@ -1,6 +1,6 @@
 import { GameConfiguration } from './../game/game-configuration';
 import { Player } from '../player/player';
-import { DirectionEnum as Direction } from './../player/direction.enum';
+import { Direction } from './../player/direction.enum';
 const Vector2 = Phaser.Math.Vector2;
 type Vector2 = Phaser.Math.Vector2;
 
@@ -94,14 +94,28 @@ export class GridPhysics {
       .add(this.movementDistance(speed));
     this.player.setPosition(newPlayerPos);
     this.tileSizePixelsWalked += speed;
+    this.updatePlayerFrame(this.movementDirection, this.tileSizePixelsWalked);
     this.tileSizePixelsWalked %= GameConfiguration.TILE_SIZE;
   }
 
+  private updatePlayerFrame(
+    direction: Direction,
+    tileSizePixelsWalked: number
+  ): void {
+    if (this.hasWalkedHalfATile(tileSizePixelsWalked)) {
+      this.player.setStandingFrame(direction);
+    } else {
+      this.player.setWalkingFrame(direction);
+    }
+  }
+  
+  private hasWalkedHalfATile(tileSizePixelsWalked: number): boolean {
+    return tileSizePixelsWalked > GameConfiguration.TILE_SIZE / 2;
+  }
+  
   private movementDistance(speed: number): Vector2 {
     return this.movementDirectionVectors[this.movementDirection]
       .clone()
       .multiply(new Vector2(speed));
   }
-
-
 }

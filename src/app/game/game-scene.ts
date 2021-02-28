@@ -23,10 +23,10 @@ export class GameScene extends Phaser.Scene {
       }
   
       const playerSprite = this.physics.add.sprite(0, 0, "player");
-      playerSprite.setDepth(2);
+      playerSprite.setDepth(1);
       this.cameras.main.startFollow(playerSprite);
       this.player = new Player(playerSprite);
-      this.player.setCoordinates(8,9);
+      this.player.initialize(8,9);
   
       this.gridPhysics = new GridPhysics(this.player);
       this.gridControls = new GridControls(

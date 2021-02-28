@@ -1,5 +1,5 @@
 import { GridPhysics } from './grid-physics';
-import { DirectionEnum } from "../player/direction.enum";
+import { Direction } from "../player/direction.enum";
 
 export class GridControls {
     constructor(
@@ -10,13 +10,13 @@ export class GridControls {
     update() {
       const cursors = this.input.keyboard.createCursorKeys();
       if (cursors.left.isDown) {
-        this.gridPhysics.movePlayer(DirectionEnum.LEFT);
+        this.gridPhysics.movePlayer(Direction.LEFT);
       } else if (cursors.right.isDown) {
-        this.gridPhysics.movePlayer(DirectionEnum.RIGHT);
+        this.gridPhysics.movePlayer(Direction.RIGHT);
       } else if (cursors.up.isDown) {
-        this.gridPhysics.movePlayer(DirectionEnum.UP);
+        this.gridPhysics.movePlayer(Direction.UP);
       } else if (cursors.down.isDown) {
-        this.gridPhysics.movePlayer(DirectionEnum.DOWN);
+        this.gridPhysics.movePlayer(Direction.DOWN);
       }
     }
   }
