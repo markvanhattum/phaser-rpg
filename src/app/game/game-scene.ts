@@ -28,7 +28,7 @@ export class GameScene extends Phaser.Scene {
       this.player = new Player(playerSprite);
       this.player.initialize(8,9);
   
-      this.gridPhysics = new GridPhysics(this.player);
+      this.gridPhysics = new GridPhysics(this.player, cloudCityTilemap);
       this.gridControls = new GridControls(
         this.input,
         this.gridPhysics

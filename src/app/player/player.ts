@@ -30,6 +30,14 @@ export class Player {
     this.sprite.setPosition(position.x, position.y);
   }
   
+  public getTilePos(): Phaser.Math.Vector2 {
+    const x =
+      (this.sprite.getCenter().x - this.playerOffsetX()) / GameConfiguration.TILE_SIZE;
+    const y =
+      (this.sprite.getCenter().y - this.playerOffsetY()) / GameConfiguration.TILE_SIZE;
+    return new Phaser.Math.Vector2(Math.floor(x), Math.floor(y));
+  }
+
   public initialize(x: number, y: number) {
     this.sprite.setPosition(
       x * GameConfiguration.TILE_SIZE + this.playerOffsetX(),

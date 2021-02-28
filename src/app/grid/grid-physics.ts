@@ -11,15 +11,19 @@ export class GridPhysics {
   private tileSizePixelsWalked: number = 0;
   private decimalPlacesLeft = 0;
 
-  constructor(private player: Player) {}
+  constructor(private player: Player,
+    private tileMap: Phaser.Tilemaps.Tilemap) {}
 
-  movePlayer(direction: Direction): void {
-    if (!this.isMoving()) {
+  public movePlayer(direction: Direction): void {
+    if (this.isMoving()) return;
+    if (this.isBlockingDirection(direction)) {
+      this.player.setStandingFrame(direction);
+    } else {
       this.startMoving(direction);
     }
   }
 
-  update(delta: number): void {
+  public update(delta: number): void {
     if (this.isMoving()) {
         this.updatePlayerPosition(delta);
     }
@@ -117,5 +121,29 @@ export class GridPhysics {
     return this.movementDirectionVectors[this.movementDirection]
       .clone()
       .multiply(new Vector2(speed));
+  }
+
+  private tilePosInDirection(direction: Direction): Vector2 {
+    return this.player
+      .getTilePos()
+      .add(this.movementDirectionVectors[direction]);
+  }
+
+  private isBlockingDirection(direction: Direction): boolean {
+    return this.hasBlockingTile(this.tilePosInDirection(direction));
+  }
+
+  private hasNoTile(pos: Vector2): boolean {
+    return !this.tileMap.layers.some((layer) =>
+      this.tileMap.hasTileAt(pos.x, pos.y, layer.name)
+    );
+  }
+
+  private hasBlockingTile(pos: Vector2): boolean {
+    if (this.hasNoTile(pos)) return true;
+    return this.tileMap.layers.some((layer) => {
+      const tile = this.tileMap.getTileAt(pos.x, pos.y, false, layer.name);
+      return tile && tile.properties.collides;
+    });
   }
 }
