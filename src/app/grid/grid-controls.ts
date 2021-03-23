@@ -1,5 +1,5 @@
 import { GridPhysics } from './grid-physics';
-import { Direction } from "../player/direction.enum";
+import { Direction } from "../direction/direction.enum";
 
 export class GridControls {
     constructor(
@@ -17,6 +17,8 @@ export class GridControls {
         this.gridPhysics.movePlayer(Direction.UP);
       } else if (cursors.down.isDown) {
         this.gridPhysics.movePlayer(Direction.DOWN);
+      } else if (cursors.space.isDown) {
+        this.gridPhysics.movePlayerToRandomPlace();
       }
     }
   }

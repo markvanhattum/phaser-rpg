@@ -1,7 +1,7 @@
 import { FrameRow } from './frame-row';
 import { GameConfiguration } from '../game/game-configuration';
 import Phaser from 'phaser';
-import { Direction } from './direction.enum';
+import { Direction } from '../direction/direction.enum';
 
 export class Player {
   public static readonly SPRITE_FRAME_WIDTH = 52;
@@ -30,7 +30,7 @@ export class Player {
     this.sprite.setPosition(position.x, position.y);
   }
   
-  public getTilePos(): Phaser.Math.Vector2 {
+  public getTilePosition(): Phaser.Math.Vector2 {
     const x =
       (this.sprite.getCenter().x - this.playerOffsetX()) / GameConfiguration.TILE_SIZE;
     const y =
@@ -38,6 +38,14 @@ export class Player {
     return new Phaser.Math.Vector2(Math.floor(x), Math.floor(y));
   }
 
+  public getPlayerLayer() {
+    return this.sprite.depth;
+  }
+
+  public setPlayerLayer(depth: number) {
+    this.sprite.depth = depth;
+  }
+  
   public initialize(x: number, y: number) {
     this.sprite.setPosition(
       x * GameConfiguration.TILE_SIZE + this.playerOffsetX(),
