@@ -6,7 +6,7 @@ import { Direction } from '../direction/direction.enum';
 export class Player {
   public static readonly SPRITE_FRAME_WIDTH = 52;
   public static readonly SPRITE_FRAME_HEIGHT = 72;
-  public static readonly SCALE_FACTOR = 1.5;
+  public static readonly SCALE_FACTOR = 1.3;
   
   public lastFootLeft = false;
   

@@ -24,8 +24,8 @@ export class GridPhysics {
    *
    * @param direction The direction in which the player should be turned.
    */
-  public movePlayer(direction: Direction): void {
-    if (this.hasADirection()) return;
+  public movePlayer(direction: Direction): boolean {
+    if (this.hasADirection()) return false;
 
     if (this.isBlockingDirection(direction)) {
       this.player.setStandingFrame(direction);
@@ -34,6 +34,8 @@ export class GridPhysics {
     }
 
     this.updateLayers();
+
+    return true;
   }
 
   private updateLayers() {
@@ -48,8 +50,8 @@ export class GridPhysics {
       foregroundTiles = this.addTiles(foregroundTiles, layer, 1, tile => tile.y > this.player.getTilePosition().y);
     });
 
-    let backgroundLayers: Array<Phaser.Tilemaps.LayerData> = this.getLayersFromTiles(backgroundTiles);
-    let foregroundLayers: Array<Phaser.Tilemaps.LayerData> = this.getLayersFromTiles(foregroundTiles);
+    const backgroundLayers: Array<Phaser.Tilemaps.LayerData> = this.getLayersFromTiles(backgroundTiles);
+    const foregroundLayers: Array<Phaser.Tilemaps.LayerData> = this.getLayersFromTiles(foregroundTiles);
 
     const maxBackgroundLayer: Phaser.Tilemaps.LayerData = this.getOneLayer(backgroundLayers, true);
     const minForegroundLayer: Phaser.Tilemaps.LayerData = this.getOneLayer(foregroundLayers, false);
@@ -73,7 +75,7 @@ export class GridPhysics {
   }
 
   private getLayersFromTiles(tiles: Phaser.Tilemaps.Tile[]): Phaser.Tilemaps.LayerData[] {
-    let layers: Phaser.Tilemaps.LayerData[] = tiles.map(tile => tile.layer);
+    const layers: Phaser.Tilemaps.LayerData[] = tiles.map(tile => tile.layer);
     return layers.filter((layer, index) => layers.indexOf(layer) === index);
   }
 
