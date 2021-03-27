@@ -1,4 +1,4 @@
-export class GameConfiguration{
+export class GameConfiguration {
   static readonly CANVAS_WIDTH: number = 640;
   static readonly CANVAS_HEIGHT: number = 640;
   static readonly TILE_SIZE: number = 48;
@@ -16,8 +16,7 @@ export class GameConfiguration{
     },
     type: Phaser.AUTO,
     scale: {
-      width: GameConfiguration.CANVAS_WIDTH,
-      height: GameConfiguration.CANVAS_HEIGHT,
+      mode: Phaser.Scale.RESIZE,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
     physics: {
@@ -27,9 +26,8 @@ export class GameConfiguration{
         debug: false,
       },
     },
-  
-    parent: "game",
-    backgroundColor: "#48C4F8",
-  };
 
+    parent: "game",
+    backgroundColor: "#FFFFFF",
+  };
 }

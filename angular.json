@@ -5,7 +5,10 @@
   "projects": {
     "phaser-rpg": {
       "projectType": "application",
-      "schematics": {},
+      "schematics":{
+        "@schematics/angular:component": {
+           "style": "scss" }
+     },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -24,7 +27,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles/styles.scss"
             ],
             "scripts": 
             ["node_modules/phaser/dist/phaser.min.js"]
@@ -88,7 +91,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles/styles.scss"
             ],
             "scripts": []
           }

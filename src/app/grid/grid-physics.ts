@@ -5,7 +5,9 @@ import { MovementDirection } from '../direction/movement-direction';
 
 export class GridPhysics {
   private readonly PIXELS_PER_SECOND: number = GameConfiguration.TILE_SIZE * 3;
+  private readonly BORDER: string = 'Border';
   private readonly GROUND: string = 'Ground';
+  private readonly GROUND_LAYERS: string[] = [this.BORDER, this.GROUND];
   private readonly DISTANCE_FROM_PLAYER: number = 20;
   private movementDirection: Direction = Direction.NONE;
   private tileSizePixelsWalked: number = 0;
@@ -39,7 +41,7 @@ export class GridPhysics {
     let foregroundTiles: Phaser.Tilemaps.Tile[] = [];
 
     this.tileMap.layers.forEach((layer) => {
-      if (layer.name === this.GROUND) {
+      if (this.GROUND_LAYERS.includes(layer.name)) {
         return;
       }
       backgroundTiles = this.addTiles(backgroundTiles, layer, -this.DISTANCE_FROM_PLAYER, tile => tile.y <= this.player.getTilePosition().y);
@@ -76,7 +78,7 @@ export class GridPhysics {
   }
 
   private getOneLayer(layers: Phaser.Tilemaps.LayerData[], max: boolean): Phaser.Tilemaps.LayerData {
-    return layers.length == 0 ? this.tileMap.getLayer(this.GROUND) : layers.reduce(
+    return layers.length == 0 ? this.tileMap.getLayer(this.BORDER) : layers.reduce(
       function (minMax, current) {
         if (max) {
           return minMax.tilemapLayer.depth > current.tilemapLayer.depth ? minMax : current;

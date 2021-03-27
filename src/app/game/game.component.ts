@@ -10,9 +10,9 @@ export class GameComponent implements OnInit {
   private phaserGame: Phaser.Game;
 
   constructor() {
-    GameConfiguration.gameConfig; 
+    GameConfiguration.gameConfig;
   }
-  
+
   ngOnInit() {
     GameConfiguration.gameConfig.scene = GameScene;
     this.phaserGame = new Phaser.Game(GameConfiguration.gameConfig);
