@@ -21,7 +21,7 @@ export class GameScene extends Phaser.Scene {
     x: number;
     y: number;
   }[];
-  private iteration_path: number = 1;
+  private iteration_path: number;
 
   constructor() {
     super({ key: 'main' });
@@ -59,13 +59,13 @@ export class GameScene extends Phaser.Scene {
     const toX = Math.floor(x / GameConfiguration.TILE_SIZE);
     const toY = Math.floor(y / GameConfiguration.TILE_SIZE);
     const self = this;
-    this.iteration_path = 1;
 
     this.pathfinder.findPath(fromX, fromY, toX, toY, function (path) {
-      self.path = path;
-      if (self.path === null) {
+      if (path == null) {
         console.warn("Path was not found.");
       } else {
+        self.path = path;
+	    self.iteration_path = 1;
         self.movePlayer(self);
       }
     });
