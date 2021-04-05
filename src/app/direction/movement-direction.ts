@@ -2,7 +2,7 @@ import { Direction } from "./direction.enum";
 
 export class MovementDirection {
       
-    public static VECTORS: {
+    static VECTORS: {
         [key in Direction]?: Phaser.Math.Vector2;
       } = {
         [Direction.UP]: Phaser.Math.Vector2.UP,
@@ -11,7 +11,7 @@ export class MovementDirection {
         [Direction.RIGHT]: Phaser.Math.Vector2.RIGHT,
     };
 
-    public static getDirection(from: Phaser.Math.Vector2, to: Phaser.Math.Vector2): Direction {
+    static getDirection(from: Phaser.Math.Vector2, to: Phaser.Math.Vector2): Direction {
       let deltaX = to.x - from.x;
       let deltaY = to.y - from.y;
       let direction: Direction = Direction.NONE;
@@ -27,6 +27,5 @@ export class MovementDirection {
       }
 
       return direction;
-    }
-      
+    }      
 }

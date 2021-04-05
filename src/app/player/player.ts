@@ -4,11 +4,11 @@ import Phaser from 'phaser';
 import { Direction } from '../direction/direction.enum';
 
 export class Player {
-  public static readonly SPRITE_FRAME_WIDTH = 52;
-  public static readonly SPRITE_FRAME_HEIGHT = 72;
-  public static readonly SCALE_FACTOR = 1.3;
+  static readonly SPRITE_FRAME_WIDTH = 52;
+  static readonly SPRITE_FRAME_HEIGHT = 72;
+  static readonly SCALE_FACTOR = 1.3;
   
-  public lastFootLeft = false;
+  lastFootLeft = false;
   
   private static readonly CHAR_INDEX = Math.floor(Math.random() * Math.floor(8));
   private static readonly CHARS_IN_ROW = 4;
@@ -22,15 +22,15 @@ export class Player {
     this.sprite.setFrame(this.framesOfDirection(Direction.DOWN).standing);
   }
 
-  public getPosition(): Phaser.Math.Vector2 {
+  getPosition(): Phaser.Math.Vector2 {
     return this.sprite.getCenter();
   }
 
-  public setPosition(position: Phaser.Math.Vector2): void {
+  setPosition(position: Phaser.Math.Vector2): void {
     this.sprite.setPosition(position.x, position.y);
   }
   
-  public getTilePosition(): Phaser.Math.Vector2 {
+  getTilePosition(): Phaser.Math.Vector2 {
     const x =
       (this.sprite.getCenter().x - this.playerOffsetX()) / GameConfiguration.TILE_SIZE;
     const y =
@@ -38,15 +38,15 @@ export class Player {
     return new Phaser.Math.Vector2(Math.floor(x), Math.floor(y));
   }
 
-  public getPlayerLayer() {
+  getPlayerLayer() {
     return this.sprite.depth;
   }
 
-  public setPlayerLayer(depth: number) {
+  setPlayerLayer(depth: number) {
     this.sprite.depth = depth;
   }
   
-  public initialize(x: number, y: number) {
+  initialize(x: number, y: number) {
     this.sprite.setPosition(
       x * GameConfiguration.TILE_SIZE + this.playerOffsetX(),
       y * GameConfiguration.TILE_SIZE + this.playerOffsetY()
@@ -73,13 +73,13 @@ export class Player {
     [Direction.UP]: 3,
   };
 
-  public setWalkingFrame(direction: Direction): void {
+  setWalkingFrame(direction: Direction): void {
     const frameRow = this.framesOfDirection(direction);
     this.sprite.setFrame(
       this.lastFootLeft ? frameRow.rightFoot : frameRow.leftFoot
     );
   }
-  public setStandingFrame(direction: Direction): void {
+  setStandingFrame(direction: Direction): void {
     if (this.isCurrentFrameStanding(direction)) {
       this.lastFootLeft = !this.lastFootLeft;
     }

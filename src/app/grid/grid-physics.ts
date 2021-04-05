@@ -1,21 +1,21 @@
+import { LayerService } from './../services/layer-service';
+// import { GameScene } from './../game/game-scene';
 import { Direction } from './../direction/direction.enum';
 import { GameConfiguration } from './../game/game-configuration';
 import { Player } from '../player/player';
 import { MovementDirection } from '../direction/movement-direction';
+import { GridTile } from './grid-tile';
 
 export class GridPhysics {
   private readonly PIXELS_PER_SECOND: number = GameConfiguration.TILE_SIZE * 3;
-  private readonly BORDER: string = 'Border';
-  private readonly GROUND: string = 'Ground';
-  private readonly GROUND_LAYERS: string[] = [this.BORDER, this.GROUND];
-  private readonly DISTANCE_FROM_PLAYER: number = 20;
   private movementDirection: Direction = Direction.NONE;
   private tileSizePixelsWalked: number = 0;
   private remnant = 0;
+  private tile = new GridTile();
 
   constructor(
     private player: Player,
-    private tileMap: Phaser.Tilemaps.Tilemap
+    private tilemap: Phaser.Tilemaps.Tilemap
   ) { }
 
   /**
@@ -24,7 +24,7 @@ export class GridPhysics {
    *
    * @param direction The direction in which the player should be turned.
    */
-  public movePlayer(direction: Direction): boolean {
+  movePlayer(direction: Direction): boolean {
     if (this.hasADirection()) return false;
 
     if (this.isBlockingDirection(direction)) {
@@ -33,67 +33,15 @@ export class GridPhysics {
       this.setPlayerDirection(direction);
     }
 
-    this.updateLayers();
+    LayerService.updateLayers(this.tilemap, this.player);
 
     return true;
-  }
-
-  private updateLayers() {
-    let backgroundTiles: Phaser.Tilemaps.Tile[] = [];
-    let foregroundTiles: Phaser.Tilemaps.Tile[] = [];
-
-    this.tileMap.layers.forEach((layer) => {
-      if (this.GROUND_LAYERS.includes(layer.name)) {
-        return;
-      }
-      backgroundTiles = this.addTiles(backgroundTiles, layer, -this.DISTANCE_FROM_PLAYER, tile => tile.y <= this.player.getTilePosition().y);
-      foregroundTiles = this.addTiles(foregroundTiles, layer, 1, tile => tile.y > this.player.getTilePosition().y);
-    });
-
-    const backgroundLayers: Array<Phaser.Tilemaps.LayerData> = this.getLayersFromTiles(backgroundTiles);
-    const foregroundLayers: Array<Phaser.Tilemaps.LayerData> = this.getLayersFromTiles(foregroundTiles);
-
-    const maxBackgroundLayer: Phaser.Tilemaps.LayerData = this.getOneLayer(backgroundLayers, true);
-    const minForegroundLayer: Phaser.Tilemaps.LayerData = this.getOneLayer(foregroundLayers, false);
-
-    this.player.setPlayerLayer(maxBackgroundLayer.tilemapLayer.depth + 1);
-
-    const delta = this.player.getPlayerLayer() + 1 - minForegroundLayer.tilemapLayer.depth;
-    foregroundLayers.forEach(layer => {
-      layer.tilemapLayer.depth = layer.tilemapLayer.depth + delta;
-    });
-  }
-
-  private addTiles(tiles: Phaser.Tilemaps.Tile[], layer: Phaser.Tilemaps.LayerData, deltaY: number, predicate): Phaser.Tilemaps.Tile[] {
-    return tiles.concat(this.tileMap.getTilesWithin(
-      this.player.getTilePosition().x - this.DISTANCE_FROM_PLAYER,
-      this.player.getTilePosition().y + deltaY,
-      2 * this.DISTANCE_FROM_PLAYER,
-      this.DISTANCE_FROM_PLAYER, null, layer.name)
-      .filter(predicate)
-      .filter(tile => tile.properties.collides));
-  }
-
-  private getLayersFromTiles(tiles: Phaser.Tilemaps.Tile[]): Phaser.Tilemaps.LayerData[] {
-    const layers: Phaser.Tilemaps.LayerData[] = tiles.map(tile => tile.layer);
-    return layers.filter((layer, index) => layers.indexOf(layer) === index);
-  }
-
-  private getOneLayer(layers: Phaser.Tilemaps.LayerData[], max: boolean): Phaser.Tilemaps.LayerData {
-    return layers.length == 0 ? this.tileMap.getLayer(this.BORDER) : layers.reduce(
-      function (minMax, current) {
-        if (max) {
-          return minMax.tilemapLayer.depth > current.tilemapLayer.depth ? minMax : current;
-        } else {
-          return minMax.tilemapLayer.depth < current.tilemapLayer.depth ? minMax : current;
-        }
-      });
   }
 
   /**
    * Moves the player to a random tile on the board.
    */
-  public movePlayerToRandomPlace() {
+  movePlayerToRandomPlace() {
     console.log('Space pressed');
   }
 
@@ -102,7 +50,7 @@ export class GridPhysics {
    * moves the player in that direction.
    * @param delta The time in milliseconds.
    */
-  public update(delta: number): void {
+  update(delta: number): void {
     if (this.hasADirection()) {
       this.updatePlayerPosition(delta);
     }
@@ -120,7 +68,7 @@ export class GridPhysics {
       this.getDistancePerDelta(delta) + this.remnant
     );
 
-    if (this.willCrossTileBorderThisUpdate(pixelsToWalkThisUpdate)) {
+    if (this.tile.willCrossTileBorderThisUpdate(this.tileSizePixelsWalked, pixelsToWalkThisUpdate)) {
       this.movePlayerSpriteRestOfTile();
     } else {
       this.movePlayerSprite(pixelsToWalkThisUpdate);
@@ -137,19 +85,6 @@ export class GridPhysics {
     return this.PIXELS_PER_SECOND * deltaInSeconds;
   }
 
-  /**
-   * Returns whether this update the player will cross the tile border.
-   *
-   * @param pixelsToWalkThisUpdate Number of pixels to walk this update.
-   */
-  private willCrossTileBorderThisUpdate(
-    pixelsToWalkThisUpdate: number
-  ): boolean {
-    return (
-      this.tileSizePixelsWalked + pixelsToWalkThisUpdate >=
-      GameConfiguration.TILE_SIZE
-    );
-  }
 
   /**
    * Moves the player for the rest of the tile.
@@ -209,15 +144,11 @@ export class GridPhysics {
     direction: Direction,
     numberOfPixelsWalkedOnThisTile: number
   ): void {
-    if (this.hasWalkedHalfATile(numberOfPixelsWalkedOnThisTile)) {
+    if (this.tile.hasWalkedHalfATile(numberOfPixelsWalkedOnThisTile)) {
       this.player.setStandingFrame(direction);
     } else {
       this.player.setWalkingFrame(direction);
     }
-  }
-
-  private hasWalkedHalfATile(numberOfPixelsWalkedOnThisTile: number): boolean {
-    return numberOfPixelsWalkedOnThisTile > GameConfiguration.TILE_SIZE / 2;
   }
 
   /**
@@ -232,55 +163,13 @@ export class GridPhysics {
   }
 
   /**
-   * Returns the position of the next tile in the given direction.
-   *
-   * @param direction The given direction.
-   */
-  private getTilePositionInDirection(
-    direction: Direction
-  ): Phaser.Math.Vector2 {
-    return this.player
-      .getTilePosition()
-      .add(MovementDirection.VECTORS[direction]);
-  }
-
-  /**
    * Returns whether the next tile in the given direction is a blocking tile.
    *
    * @param direction The given direction.
    */
   private isBlockingDirection(direction: Direction): boolean {
-    return this.hasBlockingTile(this.getTilePositionInDirection(direction));
+    return this.tile.hasBlockingTile(this.tilemap, this.tile.getTilePositionInDirection(this.player, direction));
   }
 
-  /**
-   * Returns whether the given position contains a tile.
-   *
-   * @param position The given position.
-   */
-  private hasATile(position: Phaser.Math.Vector2): boolean {
-    return this.tileMap.layers.some((layer) =>
-      this.tileMap.hasTileAt(position.x, position.y, layer.name)
-    );
-  }
-
-  /**
-   * Returns whether the given position containts a blocking tile.
-   *
-   * @param position The given position.
-   */
-  private hasBlockingTile(position: Phaser.Math.Vector2): boolean {
-    if (!this.hasATile(position)) {
-      return true;
-    }
-    return this.tileMap.layers.some((layer) => {
-      const tile = this.getTileAtPosition(position, layer);
-      return tile && tile.properties.collides;
-    });
-  }
-
-  private getTileAtPosition(position: Phaser.Math.Vector2, layer: Phaser.Tilemaps.LayerData): Phaser.Tilemaps.Tile {
-    return this.tileMap.getTileAt(position.x, position.y, false, layer.name);
-  }
 }
 
