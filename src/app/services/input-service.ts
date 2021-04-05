@@ -1,16 +1,15 @@
 import { GridPathfinder } from '../grid/grid-pathfinder';
 import { GridPhysics } from './../grid/grid-physics';
 import { GameConfiguration } from '../game/game-configuration';
-import { GameConstants } from '../game/game-constants';
 import { Player } from '../player/player';
 import { GameScene } from './../game/game-scene';
-import { js as EasyStar } from "easystarjs";
-import { MovementDirection } from './../direction/movement-direction';
+import { DirectionMovement } from '../direction/direction-movement';
 import { Direction } from '../direction/direction.enum';
+import { Node } from "../interfaces";
+import { GameConstants } from '../game/game-constants';
 
 export class InputService {
     private gridPathfinder: GridPathfinder;
-    private easyStar: EasyStar;
     private iteration_path: number;
     private path: {
         x: number;
@@ -22,8 +21,7 @@ export class InputService {
         private input: Phaser.Input.InputPlugin,
         private gridPhysics: GridPhysics
     ) {
-        this.gridPathfinder = new GridPathfinder();
-        this.easyStar = this.gridPathfinder.createPathfinder(tilemap);
+        this.gridPathfinder = new GridPathfinder(tilemap);
     }
 
     update() {
@@ -41,34 +39,28 @@ export class InputService {
         }
     }
 
-
-
     handleClick(gameScene: GameScene, gridPhysics: GridPhysics, tilemap: Phaser.Tilemaps.Tilemap, player: Player, pointer) {
-        const x = gameScene.cameras.main.scrollX + pointer.x;
-        const y = gameScene.cameras.main.scrollY + pointer.y;
-        const fromX = Math.floor(player.getTilePosition().x);
-        const fromY = Math.floor(player.getTilePosition().y);
-        const toX = Math.floor(x / GameConfiguration.TILE_SIZE);
-        const toY = Math.floor(y / GameConfiguration.TILE_SIZE);
+        const from: Node = {
+            x: Math.floor(player.getTilePosition().x),
+            y: Math.floor(player.getTilePosition().y)
+        };
+        const to: Node = {
+            x: Math.floor((gameScene.cameras.main.scrollX + pointer.x) / GameConfiguration.TILE_SIZE),
+            y: Math.floor((gameScene.cameras.main.scrollY + pointer.y) / GameConfiguration.TILE_SIZE)
+        };
 
-        // const cost8tile = tilemap.getTileAt(0, 8, true, GameConstants.LAYER_PATH);
-        // tilemap.putTileAt(cost8tile, toX, toY, false, GameConstants.LAYER_GROUND);
-        // this.acceptableTiles.push(cost8tile.index);
-        // this.acceptableTiles = this.acceptableTiles.filter((tile, index) => this.acceptableTiles.indexOf(tile) === index);
-        // this.pathfinder.setAcceptableTiles(this.acceptableTiles);
-        // this.gridPathfinder.setTileCost(this.pathfinder, tilemap);
-        // console.log(this.acceptableTiles);
+        const pathTile = tilemap.getTileAt(0, 8, true, GameConstants.LAYER_PATH);
+        const groundTile = tilemap.putTileAt(pathTile, to.x, to.y, false, GameConstants.LAYER_GROUND);
+        this.gridPathfinder.setNode(this.gridPathfinder.createNode(groundTile));
+        let path: Node[] = this.gridPathfinder.findPath(from, to);
 
-        this.easyStar.findPath(fromX, fromY, toX, toY, (path) => {
-            if (path == null) {
-                console.warn("Path was not found.");
-            } else {
-                this.path = path;
-                this.iteration_path = 1;
-                this.movePlayer(player, gridPhysics);
-            }
-        });
-        this.easyStar.calculate();
+        if (path.length == 0) {
+            console.warn("Path was not found.");
+        } else {
+            this.path = path;
+            this.iteration_path = 1;
+            this.movePlayer(player, gridPhysics);
+        }
     }
 
     private movePlayer(player: Player, gridPhysics: GridPhysics): void {
@@ -83,10 +75,9 @@ export class InputService {
                 const tile = this.path[this.iteration_path];
                 const fromPosition = player.getTilePosition();
                 const toPosition = new Phaser.Math.Vector2(tile.x, tile.y);
-                const direction = MovementDirection.getDirection(fromPosition, toPosition);
+                const direction = DirectionMovement.getDirection(fromPosition, toPosition);
 
                 if (direction != Direction.NONE && gridPhysics.movePlayer(direction)) {
-                    console.log(tile);
                     this.iteration_path++;
                 }
 

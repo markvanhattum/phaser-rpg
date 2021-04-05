@@ -1,7 +1,8 @@
 import { Direction } from "../direction/direction.enum";
-import { MovementDirection } from "../direction/movement-direction";
+import { DirectionMovement } from "../direction/direction-movement";
 import { GameConfiguration } from "../game/game-configuration";
 import { Player } from "../player/player";
+import { LayerService } from "../services/layer-service";
 
 export class GridTile {
 
@@ -35,7 +36,7 @@ export class GridTile {
     ): Phaser.Math.Vector2 {
         return player
             .getTilePosition()
-            .add(MovementDirection.VECTORS[direction]);
+            .add(DirectionMovement.VECTORS[direction]);
     }
 
     /**
@@ -58,7 +59,7 @@ export class GridTile {
         if (!this.hasATile(tilemap, position)) {
             return true;
         }
-        return tilemap.layers.some((layer) => {
+        return LayerService.getVisibleLayers(tilemap.layers).some((layer) => {
             const tile = this.getTileAtPosition(tilemap, position, layer);
             return tile && tile.properties.collides;
         });

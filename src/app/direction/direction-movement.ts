@@ -1,6 +1,6 @@
 import { Direction } from "./direction.enum";
 
-export class MovementDirection {
+export class DirectionMovement {
       
     static VECTORS: {
         [key in Direction]?: Phaser.Math.Vector2;

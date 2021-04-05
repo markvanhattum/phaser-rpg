@@ -3,7 +3,7 @@ import { LayerService } from './../services/layer-service';
 import { Direction } from './../direction/direction.enum';
 import { GameConfiguration } from './../game/game-configuration';
 import { Player } from '../player/player';
-import { MovementDirection } from '../direction/movement-direction';
+import { DirectionMovement } from '../direction/direction-movement';
 import { GridTile } from './grid-tile';
 
 export class GridPhysics {
@@ -157,7 +157,7 @@ export class GridPhysics {
    * @param speed The given speed.
    */
   private movementDistance(speed: number): Phaser.Math.Vector2 {
-    return MovementDirection.VECTORS[this.movementDirection]
+    return DirectionMovement.VECTORS[this.movementDirection]
       .clone()
       .multiply(new Phaser.Math.Vector2(speed));
   }
