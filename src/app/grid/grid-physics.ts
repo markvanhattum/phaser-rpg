@@ -1,21 +1,23 @@
 import { LayerService } from './../services/layer-service';
-// import { GameScene } from './../game/game-scene';
 import { Direction } from './../direction/direction.enum';
 import { GameConfiguration } from './../game/game-configuration';
 import { Player } from '../player/player';
 import { DirectionMovement } from '../direction/direction-movement';
-import { GridTile } from './grid-tile';
+import { TileService } from '../services/tile-service';
+import { GridPathfinder } from './grid-pathfinder';
+import { Node } from '../interfaces';
 
 export class GridPhysics {
   private readonly PIXELS_PER_SECOND: number = GameConfiguration.TILE_SIZE * 3;
   private movementDirection: Direction = Direction.NONE;
   private tileSizePixelsWalked: number = 0;
   private remnant = 0;
-  private tile = new GridTile();
+  private tile = new TileService();
 
   constructor(
     private player: Player,
-    private tilemap: Phaser.Tilemaps.Tilemap
+    private tilemap: Phaser.Tilemaps.Tilemap,
+    private gridPathfinder: GridPathfinder
   ) { }
 
   /**
@@ -24,13 +26,15 @@ export class GridPhysics {
    *
    * @param direction The direction in which the player should be turned.
    */
-  movePlayer(direction: Direction): boolean {
-    if (this.hasADirection()) return false;
+  turnPlayerInWalkingDirection(direction: Direction): boolean {
+    if (this.movementDirection != Direction.NONE) {
+      return false;
+    }
 
-    if (this.isBlockingDirection(direction)) {
+    if (this.tile.hasBlockingTile(this.tilemap, this.tile.getTilePositionInDirection(this.player, direction))) {
       this.player.setStandingFrame(direction);
     } else {
-      this.setPlayerDirection(direction);
+      this.movementDirection = direction;
     }
 
     LayerService.updateLayers(this.tilemap, this.player);
@@ -51,7 +55,7 @@ export class GridPhysics {
    * @param delta The time in milliseconds.
    */
   update(delta: number): void {
-    if (this.hasADirection()) {
+    if (this.movementDirection != Direction.NONE) {
       this.updatePlayerPosition(delta);
     }
   }
@@ -93,43 +97,22 @@ export class GridPhysics {
     this.movePlayerSprite(
       GameConfiguration.TILE_SIZE - this.tileSizePixelsWalked
     );
-    this.resetPlayerDirection();
-  }
-
-  /**
-   * True if the player faces a direction.
-   */
-  private hasADirection(): boolean {
-    return this.movementDirection != Direction.NONE;
-  }
-
-  /**
-   * Sets the player direction.
-   *
-   * @param direction The direction in which the player should be set.
-   */
-  private setPlayerDirection(direction: Direction): void {
-    this.movementDirection = direction;
-  }
-
-  /**
-   * Resets the player direction.
-   */
-  private resetPlayerDirection(): void {
     this.movementDirection = Direction.NONE;
+    const newTilePosition: Phaser.Math.Vector2 = this.player.getTilePosition();
+    
+    TileService.updateTileCost(this.tilemap, this.gridPathfinder, { x: newTilePosition.x, y: newTilePosition.y }, -5, false);
   }
 
   /**
    * Moves the player.
    *
-   * @param speed
+   * @param pixels
    */
-  private movePlayerSprite(speed): void {
-    const newPlayerPos = this.player
+  private movePlayerSprite(pixels): void {
+    this.player.setPosition(this.player
       .getPosition()
-      .add(this.movementDistance(speed));
-    this.player.setPosition(newPlayerPos);
-    this.tileSizePixelsWalked += speed;
+      .add(this.movementDistance(pixels)));
+    this.tileSizePixelsWalked += pixels;
     this.updatePlayerFrame(this.movementDirection, this.tileSizePixelsWalked);
     this.tileSizePixelsWalked %= GameConfiguration.TILE_SIZE;
   }
@@ -160,15 +143,6 @@ export class GridPhysics {
     return DirectionMovement.VECTORS[this.movementDirection]
       .clone()
       .multiply(new Phaser.Math.Vector2(speed));
-  }
-
-  /**
-   * Returns whether the next tile in the given direction is a blocking tile.
-   *
-   * @param direction The given direction.
-   */
-  private isBlockingDirection(direction: Direction): boolean {
-    return this.tile.hasBlockingTile(this.tilemap, this.tile.getTilePositionInDirection(this.player, direction));
   }
 
 }

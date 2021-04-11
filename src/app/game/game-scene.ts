@@ -1,3 +1,4 @@
+import { GridPathfinder } from './../grid/grid-pathfinder';
 import { GameConstants } from './game-constants';
 import { InputService } from './../services/input-service';
 import { LayerService } from './../services/layer-service';
@@ -7,6 +8,7 @@ import { Player } from "../player/player";
 export class GameScene extends Phaser.Scene {
   private player: Player;
   private gridPhysics: GridPhysics;
+  private gridPathfinder: GridPathfinder;
   private inputService: InputService;
 
   constructor() {
@@ -29,9 +31,10 @@ export class GameScene extends Phaser.Scene {
 
     this.createPlayerSprite();
 
-    this.gridPhysics = new GridPhysics(this.player, tilemap);
+    this.gridPathfinder = new GridPathfinder(tilemap);
+    this.gridPhysics = new GridPhysics(this.player, tilemap, this.gridPathfinder);
 
-    this.inputService = new InputService(tilemap, this.input, this.gridPhysics);
+    this.inputService = new InputService(tilemap, this.input, this.gridPhysics, this.gridPathfinder);
     this.input.on('pointerup', (pointer) => this.inputService.handleClick(this, this.gridPhysics, tilemap, this.player, pointer));
   }
 

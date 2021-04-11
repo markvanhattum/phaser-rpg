@@ -6,10 +6,9 @@ import { GameScene } from './../game/game-scene';
 import { DirectionMovement } from '../direction/direction-movement';
 import { Direction } from '../direction/direction.enum';
 import { Node } from "../interfaces";
-import { GameConstants } from '../game/game-constants';
+import { TileService } from './tile-service';
 
 export class InputService {
-    private gridPathfinder: GridPathfinder;
     private iteration_path: number;
     private path: {
         x: number;
@@ -19,21 +18,21 @@ export class InputService {
     constructor(
         private tilemap: Phaser.Tilemaps.Tilemap,
         private input: Phaser.Input.InputPlugin,
-        private gridPhysics: GridPhysics
+        private gridPhysics: GridPhysics, 
+        private gridPathfinder: GridPathfinder
     ) {
-        this.gridPathfinder = new GridPathfinder(tilemap);
     }
 
     update() {
         const cursors = this.input.keyboard.createCursorKeys();
         if (cursors.left.isDown) {
-            this.gridPhysics.movePlayer(Direction.LEFT);
+            this.gridPhysics.turnPlayerInWalkingDirection(Direction.LEFT);
         } else if (cursors.right.isDown) {
-            this.gridPhysics.movePlayer(Direction.RIGHT);
+            this.gridPhysics.turnPlayerInWalkingDirection(Direction.RIGHT);
         } else if (cursors.up.isDown) {
-            this.gridPhysics.movePlayer(Direction.UP);
+            this.gridPhysics.turnPlayerInWalkingDirection(Direction.UP);
         } else if (cursors.down.isDown) {
-            this.gridPhysics.movePlayer(Direction.DOWN);
+            this.gridPhysics.turnPlayerInWalkingDirection(Direction.DOWN);
         } else if (cursors.space.isDown) {
             this.gridPhysics.movePlayerToRandomPlace();
         }
@@ -49,9 +48,8 @@ export class InputService {
             y: Math.floor((gameScene.cameras.main.scrollY + pointer.y) / GameConfiguration.TILE_SIZE)
         };
 
-        const pathTile = tilemap.getTileAt(0, 8, true, GameConstants.LAYER_PATH);
-        const groundTile = tilemap.putTileAt(pathTile, to.x, to.y, false, GameConstants.LAYER_GROUND);
-        this.gridPathfinder.setNode(this.gridPathfinder.createNode(groundTile));
+        TileService.updateTileCost(tilemap, this.gridPathfinder, {x: Math.round(Math.random() * 20), y: Math.round(Math.random() * 20)}, 1, true);
+
         let path: Node[] = this.gridPathfinder.findPath(from, to);
 
         if (path.length == 0) {
@@ -77,7 +75,7 @@ export class InputService {
                 const toPosition = new Phaser.Math.Vector2(tile.x, tile.y);
                 const direction = DirectionMovement.getDirection(fromPosition, toPosition);
 
-                if (direction != Direction.NONE && gridPhysics.movePlayer(direction)) {
+                if (direction != Direction.NONE && gridPhysics.turnPlayerInWalkingDirection(direction)) {
                     this.iteration_path++;
                 }
 
@@ -89,6 +87,4 @@ export class InputService {
 
         followThePath(delay);
     }
-
-
 }

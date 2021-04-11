@@ -2,14 +2,15 @@ import { FrameRow } from './frame-row';
 import { GameConfiguration } from '../game/game-configuration';
 import Phaser from 'phaser';
 import { Direction } from '../direction/direction.enum';
+import { Node } from '../interfaces';
 
 export class Player {
   static readonly SPRITE_FRAME_WIDTH = 52;
   static readonly SPRITE_FRAME_HEIGHT = 72;
   static readonly SCALE_FACTOR = 1.3;
-  
+
   lastFootLeft = false;
-  
+
   private static readonly CHAR_INDEX = Math.floor(Math.random() * Math.floor(8));
   private static readonly CHARS_IN_ROW = 4;
   private static readonly FRAMES_PER_CHAR_ROW = 3;
@@ -29,7 +30,7 @@ export class Player {
   setPosition(position: Phaser.Math.Vector2): void {
     this.sprite.setPosition(position.x, position.y);
   }
-  
+
   getTilePosition(): Phaser.Math.Vector2 {
     const x =
       (this.sprite.getCenter().x - this.playerOffsetX()) / GameConfiguration.TILE_SIZE;
@@ -45,7 +46,7 @@ export class Player {
   setPlayerLayer(depth: number) {
     this.sprite.depth = depth;
   }
-  
+
   initialize(x: number, y: number) {
     this.sprite.setPosition(
       x * GameConfiguration.TILE_SIZE + this.playerOffsetX(),
@@ -92,7 +93,7 @@ export class Player {
       this.framesOfDirection(direction).standing
     );
   }
-  
+
   private framesOfDirection(direction: Direction): FrameRow {
     const playerRow = Math.floor(Player.CHAR_INDEX / Player.CHARS_IN_ROW);
     const playerCol = Player.CHAR_INDEX % Player.CHARS_IN_ROW;

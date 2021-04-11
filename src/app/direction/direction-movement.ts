@@ -1,3 +1,4 @@
+import { Node } from "../interfaces";
 import { Direction } from "./direction.enum";
 
 export class DirectionMovement {
@@ -11,7 +12,7 @@ export class DirectionMovement {
         [Direction.RIGHT]: Phaser.Math.Vector2.RIGHT,
     };
 
-    static getDirection(from: Phaser.Math.Vector2, to: Phaser.Math.Vector2): Direction {
+    static getDirection(from: Node, to: Node): Direction {
       let deltaX = to.x - from.x;
       let deltaY = to.y - from.y;
       let direction: Direction = Direction.NONE;

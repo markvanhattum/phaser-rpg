@@ -56,7 +56,7 @@ export class GridPathfinder {
         return '(' + node.x + ',' + node.y + ')';
     }
 
-    private createNeighboursArray(tilemap: Phaser.Tilemaps.Tilemap, node: Node): Node[] {
+    createNeighboursArray(tilemap: Phaser.Tilemaps.Tilemap, node: Node): Node[] {
         let neighbours: Node[] = [];
         const x = node.x
         const y = node.y
